@@ -1,0 +1,22 @@
+{
+  "watch": [
+    "Src/",
+    ".babelrc",
+    ".env",
+    ".eslintrc.json",
+    ".gitignore",
+    "jsconfig.json",
+    "nodemon.json",
+    "package.json",
+    "webpack.config.js"
+  ],
+  "ignore": [
+    "Build/",
+    "node_modules/",
+    "*.test.js", 
+    "*.spec.js", 
+    "*.lock",
+    "*.example"
+  ],
+  "verbose": true
+}
