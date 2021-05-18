@@ -4,7 +4,6 @@
 import { AppPort, JWTSecret } from './Config/Settings';
 
 // Application level imports
-import bodyParser from 'body-parser';
 import express from 'express';
 
 // Security related dependencies
@@ -75,10 +74,10 @@ app.use(cors(corsOptions));
 app.use(helmet(helmet.hidePoweredBy()));
 
 // Parse JSON Bodies into JS Objects
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Parse requests of content-type - application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({
+app.use(express.urlencoded({
     extended: true,
 }));
 

@@ -8,11 +8,7 @@ let City = (zip, name) => new CityModel({
     name: name,
 });
 
-// function NewCity(req, res)
-// {
-//     // Create a new city
-// }
-
+// Implement Non Null Measures
 function AddCity(req, res) {
     let nc = City(
         req.body.zip,
@@ -48,37 +44,69 @@ function AddCity(req, res) {
     });
 }
 
-function GetCity(req, res)
+function GetCityByID(req, res)
 {
-    let zip = req.query.zip;
-    let name = req.query.name;
+    let value = req.query.id;
 
-    if (zip && !name)
-    {
-        name = "";
-    }
-    else if (!zip && name)
-    {
-        zip = "";
-    }
-    else if (!zip && !name)
-    {
-        res.json({
-            error: 'No value defined'
-        });
+    const query = `CALL girozilla.Get_City_By_ID(${value})`;
 
-        return;
-    }
-
-    const q = `CALL girozilla.Get_City('${zip}', '${name}');`;
-
-    // Check if the user exists
-    pool.query(q, (err, rows) =>
+    pool.query(query, (err, rows) =>
     {
-        // Check for errors
-        if (!err)
+        if (!err && rows[0].length > 0)
         {
-            res.json(rows[0]);
+            res.json(rows[0][0]);
+        }
+
+        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+
+        logger.error(errorMessage);
+
+        res.json({
+            Code: err.code,
+            Number: err.errno,
+            SqlState: err.sqlState,
+            Stack: err.stack
+        });
+    });
+}
+
+function GetCityByZip(req, res) 
+{
+    let value = req.query.zip;
+
+    const query = `CALL girozilla.Get_City_By_ZipCode('${value}')`;
+
+    pool.query(query, (err, rows) =>
+    {
+        if (!err && rows[0].length > 0)
+        {
+            res.json(rows[0][0]);
+        }
+
+        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+
+        logger.error(errorMessage);
+
+        res.json({
+            Code: err.code,
+            Number: err.errno,
+            SqlState: err.sqlState,
+            Stack: err.stack
+        });
+    });
+}
+
+function GetCityByName(req, res) 
+{
+    let value = req.query.name;
+
+    const query = `CALL girozilla.Get_City_By_Name("${value}")`;
+
+    pool.query(query, (err, rows) =>
+    {
+        if (!err && rows[0].length > 0)
+        {
+            res.json(rows[0][0]);
         }
 
         let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
@@ -155,21 +183,25 @@ function GetAllCities (req, res)
         if (!err && rows[0].length > 0)
         {
             res.json(rows[0]);
-            logger.info(`Accessing row ${user.id}`);
         }
-        else
-        {
-            res.json({
-                Error: true,
-                Message: `No User has been found with id. ${user.id}!`,
-            });
-            logger.error(`${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`);
-        }
+
+        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+
+        logger.error(errorMessage);
+
+        res.json({
+            Code: err.code,
+            Number: err.errno,
+            SqlState: err.sqlState,
+            Stack: err.stack
+        });
     });
 }
 
 export default {
-    // GetCity,
+    GetCityByID,
+    GetCityByZip,
+    GetCityByName,
     AddCity,
     // EditCity,
     // RemoveCity,
