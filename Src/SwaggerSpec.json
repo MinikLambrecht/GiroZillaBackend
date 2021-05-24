@@ -13,7 +13,7 @@
             "email": "MinikGLambrecht@hotmail.com"
         }
     },
-    "host": "undefined:21875",
+    "host": "localhost:21875",
     "basePath": "/girozillabackend/api/v1",
     "servers": [
         {
