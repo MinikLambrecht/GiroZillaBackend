@@ -13,8 +13,6 @@
             "email": "MinikGLambrecht@hotmail.com"
         }
     },
-    "host": "localhost:21875",
-    "basePath": "/girozillabackend/api/v1",
     "servers": [
         {
             "url": "http://localhost:21875/girozillabackend/api/v1",
@@ -32,19 +30,35 @@
                 "tags": [
                     "Cities"
                 ],
-                "consumes": [
-                    "application/json"
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/definitions/City"
-                            },
-                            "example": {
-                                "value": 251,
-                                "zip": 5799,
-                                "city": "Svendborg"
+                                "type": "object",
+                                "required": [
+                                    "value",
+                                    "zip",
+                                    "city"
+                                ],
+                                "properties": {
+                                    "value": {
+                                        "type": "integer",
+                                        "example": "251 or 5700"
+                                    },
+                                    "zip": {
+                                        "type": "integer",
+                                        "example": 5700
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Svendborg"
+                                    }
+                                },
+                                "example": {
+                                    "value": 251,
+                                    "zip": 5799,
+                                    "city": "Svendborg"
+                                }
                             }
                         }
                     }
@@ -59,7 +73,7 @@
                     "405": {
                         "description": "No Content. id or ZipCode was not found."
                     },
-                    "5xx": {
+                    "5XX": {
                         "description": "Unexpected error."
                     }
                 }
@@ -75,7 +89,7 @@
                     "200": {
                         "description": "OK. Returns a list of Cities."
                     },
-                    "5xx": {
+                    "5XX": {
                         "description": "Unexpected error."
                     }
                 }
@@ -111,7 +125,7 @@
                     "204": {
                         "description": "No Content. The id was not found."
                     },
-                    "5xx": {
+                    "5XX": {
                         "description": "Unexpected error."
                     }
                 }
@@ -147,7 +161,7 @@
                     "204": {
                         "description": "No Content. The ZipCode was not found."
                     },
-                    "5xx": {
+                    "5XX": {
                         "description": "Unexpected error."
                     }
                 }
@@ -180,7 +194,7 @@
                             }
                         }
                     },
-                    "5xx": {
+                    "5XX": {
                         "description": "Unexpected error."
                     }
                 }
@@ -192,18 +206,29 @@
                 "tags": [
                     "Cities"
                 ],
-                "consumes": [
-                    "application/json"
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/definitions/City"
-                            },
-                            "example": {
-                                "zip": 5700,
-                                "city": "Svendborg"
+                                "type": "object",
+                                "required": [
+                                    "zip",
+                                    "city"
+                                ],
+                                "properties": {
+                                    "zip": {
+                                        "type": "integer",
+                                        "example": 5700
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Svendborg"
+                                    }
+                                },
+                                "example": {
+                                    "zip": 5700,
+                                    "city": "Svendborg"
+                                }
                             }
                         }
                     }
@@ -239,7 +264,7 @@
                             }
                         }
                     },
-                    "5xx": {
+                    "5XX": {
                         "description": "Unexpected error."
                     }
                 }
@@ -277,28 +302,9 @@
                     "204": {
                         "description": "No Content. id or ZipCode was not found."
                     },
-                    "5xx": {
+                    "5XX": {
                         "description": "Unexpected error."
                     }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "City": {
-            "type": "object",
-            "required": [
-                "zip",
-                "city"
-            ],
-            "properties": {
-                "zip": {
-                    "type": "integer",
-                    "example": 5700
-                },
-                "city": {
-                    "type": "string",
-                    "example": "Svendborg"
                 }
             }
         }

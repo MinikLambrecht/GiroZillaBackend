@@ -53,17 +53,29 @@ const EndpointMethod = {
  *   put:
  *     summary: Edit a City
  *     tags: [Cities]
- *     consumes:
- *       - application/json
  *     requestBody:
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/definitions/City'
- *           example:
- *             value: 251
- *             zip: 5799
- *             city: Svendborg
+ *             type: object
+ *             required:
+ *                 - value
+ *                 - zip
+ *                 - city
+ *             properties:
+ *               value:
+ *                 type: integer
+ *                 example: 251 or 5700
+ *               zip:
+ *                 type: integer
+ *                 example: 5700
+ *               city:
+ *                 type: string
+ *                 example: Svendborg
+ *             example:
+ *               value: 251
+ *               zip: 5799
+ *               city: Svendborg
  *     responses:
  *       200:
  *         description: OK
@@ -71,25 +83,8 @@ const EndpointMethod = {
  *         description: Bad Request.
  *       405:
  *         description: No Content. id or ZipCode was not found.
- *       5xx:
+ *       5XX:
  *         description: Unexpected error.
- * definitions:
- *   City:
- *     type: object
- *     required:
- *       - value
- *       - zip
- *       - city
- *     properties:
- *       value:
- *         type: integer
- *         example: 251 or 5700
- *       zip:
- *         type: integer
- *         example: 5700
- *       city:
- *         type: string
- *         example: Svendborg
  */
 cityRouter.put(`${EndpointMethod.Put}/City`, CityController.EditCity);
 
@@ -104,7 +99,7 @@ cityRouter.put(`${EndpointMethod.Put}/City`, CityController.EditCity);
  *     responses:
  *       200:
  *         description: OK. Returns a list of Cities.
- *       5xx:
+ *       5XX:
  *         description: Unexpected error.
  */
 cityRouter.get(`${EndpointMethod.GetAll}/Cities`, CityController.GetAllCities);
@@ -130,7 +125,7 @@ cityRouter.get(`${EndpointMethod.GetAll}/Cities`, CityController.GetAllCities);
  *               $ref: '#/components/schemas/City'
  *       204:
  *         description: No Content. The id was not found.
- *       5xx:
+ *       5XX:
  *         description: Unexpected error.
  */
 cityRouter.get(`${EndpointMethod.Get}/City/Id`, CityController.GetCityByID);
@@ -156,7 +151,7 @@ cityRouter.get(`${EndpointMethod.Get}/City/Id`, CityController.GetCityByID);
  *               $ref: '#/components/schemas/City'
  *       204:
  *         description: No Content. The ZipCode was not found.
- *       5xx:
+ *       5XX:
  *         description: Unexpected error.
  */
 cityRouter.get(`${EndpointMethod.Get}/City/ZipCode`, CityController.GetCityByZip);
@@ -180,7 +175,7 @@ cityRouter.get(`${EndpointMethod.Get}/City/ZipCode`, CityController.GetCityByZip
  *             schema:
  *               type: object
  *               $ref: '#/components/schemas/City'
- *       5xx:
+ *       5XX:
  *         description: Unexpected error.
  */
 cityRouter.get(`${EndpointMethod.Get}/City/Name`, CityController.GetCityByName);
@@ -192,16 +187,24 @@ cityRouter.get(`${EndpointMethod.Get}/City/Name`, CityController.GetCityByName);
  *   post:
  *     summary: Add a new City
  *     tags: [Cities]
- *     consumes:
- *       - application/json
  *     requestBody:
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/definitions/City'
- *           example:
- *             zip: 5700
- *             city: Svendborg
+ *             type: object
+ *             required:
+ *               - zip
+ *               - city
+ *             properties:
+ *               zip:
+ *                 type: integer
+ *                 example: 5700
+ *               city:
+ *                 type: string
+ *                 example: Svendborg
+ *             example:
+ *               zip: 5700
+ *               city: Svendborg
  *     responses:
  *       201:
  *         description: Created
@@ -222,21 +225,8 @@ cityRouter.get(`${EndpointMethod.Get}/City/Name`, CityController.GetCityByName);
  *               example:
  *                 Code: 405,
  *                 Message: Method Not Allowed, missing data in request.
- *       5xx:
+ *       5XX:
  *         description: Unexpected error.
- * definitions:
- *   City:
- *     type: object
- *     required:
- *       - zip
- *       - city
- *     properties:
- *       zip:
- *         type: integer
- *         example: 5700
- *       city:
- *         type: string
- *         example: Svendborg
  */
 cityRouter.post(`${EndpointMethod.Add}/City`, CityController.AddCity);
 
@@ -263,7 +253,7 @@ cityRouter.post(`${EndpointMethod.Add}/City`, CityController.AddCity);
  *                 Message: OK, City with id or Zipcode 251 has been removed
  *       204:
  *         description: No Content. id or ZipCode was not found.
- *       5xx:
+ *       5XX:
  *         description: Unexpected error.
  */
 cityRouter.delete(`${EndpointMethod.Delete}/City`, CityController.RemoveCity);

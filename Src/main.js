@@ -31,16 +31,6 @@ import { cityRouter } from "./Routes";
 logger.info('Imports Done');
 
 // CONFIGURATION ----------------------------------------------------------
-let ip;
-
-if (EnvMode == 'production')
-{
-    ip = '87.61.88.75';
-}
-else
-{
-    ip = 'localhost';
-}
 
 
 // Setup Swagger OpenAPI 3.0 docs
@@ -60,8 +50,6 @@ const options = {
                 email: 'MinikGLambrecht@hotmail.com',
             },
         },
-        host: `${ip}:21875`,
-        basePath: `/${apiName}/api/v${apiVersion}`,
         servers: [
             {
                 url: 'http://localhost:21875/girozillabackend/api/v1',
