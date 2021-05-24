@@ -34,6 +34,19 @@ module.exports = {
                 include: SRC_DIR,
                 use: 'json-loader',
             },
+            {
+                test: /\.yaml$/,
+                use: [
+                    { 
+                        loader: 
+                        'json-loader' 
+                    },
+                    { 
+                        loader: 
+                        'yaml-loader' 
+                    }
+                ]
+            },
         ],
     },
 };

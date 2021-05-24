@@ -1,3 +1,4 @@
+
 /* eslint-disable consistent-return */
 import logger from '../Config/Winston';
 import pool from '../Config/Database';
@@ -8,12 +9,20 @@ let City = (zip, name) => new CityModel({
     name: name,
 });
 
-// Implement Non Null Measures
+
 function AddCity(req, res) {
     let nc = City(
         req.body.zip,
         req.body.city
     );
+
+    if (nc.zip == null || nc.name == null || !nc.name)
+    {
+        res.status(405).json({
+            Code: 405,
+            Message: 'Method Not Allowed, missing data in request.'
+        })
+    }
 
     const q = `CALL girozilla.Add_City(${nc.zip}, '${nc.name}')`;
 
@@ -26,21 +35,30 @@ function AddCity(req, res) {
 
             logger.debug(msg);
 
-            res.json({
+            res.status(201).json({
                 Message: msg
             });
         }
+        else
+        {
+            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
 
-        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+            logger.error(errorMessage);
 
-        logger.error(errorMessage);
-
-        res.json({
-            Code: err.code,
-            Number: err.errno,
-            SqlState: err.sqlState,
-            Stack: err.stack
-        });
+            switch(err.code)
+            {
+                case "ER_BAD_FIELD_ERROR":
+                {
+                    res.status(400).json({
+                        Code: err.code,
+                        Number: err.errno,
+                        SqlState: err.sqlState,
+                        Stack: err.stack
+                    })
+                    break;
+                }
+            }
+        }
     });
 }
 
@@ -52,21 +70,30 @@ function GetCityByID(req, res)
 
     pool.query(query, (err, rows) =>
     {
-        if (!err && rows[0].length > 0)
+        if (value == "" || rows[0].length < 1)
         {
-            res.json(rows[0][0]);
+            res.status(204);
+            res.end();
+            pool.destroy();
         }
 
-        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+        if (!err && rows[0].length > 0)
+        {
+            res.json(rows[0]);
+        }
+        else
+        {
+            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
 
-        logger.error(errorMessage);
+            logger.error(errorMessage);
 
-        res.json({
-            Code: err.code,
-            Number: err.errno,
-            SqlState: err.sqlState,
-            Stack: err.stack
-        });
+            res.status(400).json({
+                Code: err.code,
+                Number: err.errno,
+                SqlState: err.sqlState,
+                Stack: err.stack
+            });
+        }
     });
 }
 
@@ -78,21 +105,30 @@ function GetCityByZip(req, res)
 
     pool.query(query, (err, rows) =>
     {
+        if (value == "" || rows[0].length < 1)
+        {
+            res.status(204);
+            res.end();
+            pool.destroy();
+        }
+
         if (!err && rows[0].length > 0)
         {
             res.json(rows[0][0]);
         }
+        else
+        {
+            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
 
-        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+            logger.error(errorMessage);
 
-        logger.error(errorMessage);
-
-        res.json({
-            Code: err.code,
-            Number: err.errno,
-            SqlState: err.sqlState,
-            Stack: err.stack
-        });
+            res.json({
+                Code: err.code,
+                Number: err.errno,
+                SqlState: err.sqlState,
+                Stack: err.stack
+            });
+        }
     });
 }
 
@@ -104,73 +140,120 @@ function GetCityByName(req, res)
 
     pool.query(query, (err, rows) =>
     {
+        if (value == "" || rows[0].length < 1)
+        {
+            res.status(204);
+            res.end();
+            pool.destroy();
+        }
+
         if (!err && rows[0].length > 0)
         {
             res.json(rows[0][0]);
         }
+        else
+        {
+            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
 
-        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+            logger.error(errorMessage);
 
-        logger.error(errorMessage);
-
-        res.json({
-            Code: err.code,
-            Number: err.errno,
-            SqlState: err.sqlState,
-            Stack: err.stack
-        });
+            res.json({
+                Code: err.code,
+                Number: err.errno,
+                SqlState: err.sqlState,
+                Stack: err.stack
+            });
+        }
     });
 }
 
 function EditCity(req, res)
 {
-    const q = `CALL Get_User_By_Email(?)`;
+    let value = req.body.value;
 
-    // Find the user by Email
-    // eslint-disable-next-line consistent-return
-    pool.query(q, email, (error, results) =>
+    let nc = City(
+        req.body.zip,
+        req.body.city
+    );
+
+    const q = `CALL girozilla.Edit_City(${value}, ${nc.zip}, '${nc.name}')`;
+
+    pool.query(q, (err, rows) =>
     {
-        if (!error)
+        
+        if (nc.zip == "" || nc.zip == undefined || nc.name == "" || nc.name == undefined || value == "" || value == undefined || rows.affectedRows < 1)
         {
-            
+            res.status(405).json({
+                Code: 405,
+                Message: 'Method Not Allowed, missing data in request.'
+            });
+            res.end();
+            pool.destroy();
         }
 
-        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+        if (!err && rows.affectedRows > 0)
+        {
+            let msg = `City with id or ZipCode ${value} has been changed`;
 
-        logger.error(errorMessage);
+            logger.debug(msg);
 
-        res.json({
-            Code: err.code,
-            Number: err.errno,
-            SqlState: err.sqlState,
-            Stack: err.stack
-        });
+            res.status(200).json({
+                Message: msg
+            });
+        }
+        else
+        {
+            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+
+            logger.error(errorMessage);
+
+            res.json({
+                Code: err.code,
+                Number: err.errno,
+                SqlState: err.sqlState,
+                Stack: err.stack
+            });
+        }
     });
 }
 
 function RemoveCity (req, res)
 {
-    // If no user is currently logged in
-    // return 404
-    if (!req.session.user)
+    let value = req.query.value;
+
+    const query = `CALL girozilla.Remove_City('${value}')`;
+
+    pool.query(query, (err, rows) =>
     {
-        logger.debug('No user is logged in');
+        if (rows.affectedRows < 1)
+        {
+            res.status(204);
+        }
 
-        return res.status(404).json({
-            nouser: 'No user is logged in',
-        });
-    }
+        if(!err && rows.affectedRows > 0)
+        {
+            console.log(`Error: ${rows.affectedRows}`)
+            let msg = `OK, City with id or Zipcode ${value} has been removed`;
 
-    // Make a copy of the username logging out.
-    const tempName = new UserModel(req.session.user).name;
+            logger.debug(msg);
 
-    // Destory the users sessions logging them out
-    req.session.destroy(function(){
-        logger.debug(`${tempName} has logged out`)
+            res.status(200).json({
+                Message: msg
+            });
+        }
+        else
+        {
+            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
 
-        return res.status(200).json({
-            loggedout: `${tempName} has been logged out`,
-        });
+            logger.error(errorMessage);
+
+            res.status(400).json({
+                Code: err.code,
+                Number: err.errno,
+                SqlState: err.sqlState,
+                Stack: err.stack
+            });
+        }
     });
 }
 
@@ -184,17 +267,19 @@ function GetAllCities (req, res)
         {
             res.json(rows[0]);
         }
+        else
+        {
+            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
 
-        let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+            logger.error(errorMessage);
 
-        logger.error(errorMessage);
-
-        res.json({
-            Code: err.code,
-            Number: err.errno,
-            SqlState: err.sqlState,
-            Stack: err.stack
-        });
+            res.json({
+                Code: err.code,
+                Number: err.errno,
+                SqlState: err.sqlState,
+                Stack: err.stack
+            });
+        }
     });
 }
 
@@ -203,7 +288,7 @@ export default {
     GetCityByZip,
     GetCityByName,
     AddCity,
-    // EditCity,
-    // RemoveCity,
+    EditCity,
+    RemoveCity,
     GetAllCities,
 };
