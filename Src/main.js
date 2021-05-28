@@ -8,6 +8,8 @@ let SoftwareInformation = require('../package.json');
 let apiName = SoftwareInformation.name;
 let apiVersion = SoftwareInformation.version.split('.')[0];
 
+let APIBasePath = `/${apiName}/api/v${apiVersion}`;
+
 // Application level imports
 import express from 'express';
 
@@ -24,7 +26,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 
 // Routes
 // import router from './Routes';
-import { cityRouter } from "./Routes";
+import { cityRouter, customerRouter, productRouter, routeCustomerRouter, routeRouter, serviceDataRouter, serviceProductRouter, serviceRouter } from "./Routes";
 
 // ------------------------------------------------------------------------
 
@@ -56,7 +58,7 @@ const options = {
                 description: 'Development Server',
             },
             {
-                url: 'http://87.61.88.75:21875/girozillabackend/api/v1',
+                url: 'https://api.pyrocorestudios.dk/girozillabackend/api/v1',
                 description: 'Production Server',
             }
         ],
@@ -107,11 +109,6 @@ fs.readFile(Spec, 'utf8', (err, data) => {
             });
         }
     }
-
-    let obj = JSON.parse(data);
-
-    logger.info(`Swagger host setup on '${obj.host}'`);
-    logger.info(`Swagger basePath setup on '${obj.basePath}'`);
 });
 
 
@@ -200,12 +197,40 @@ logger.info(`API '${apiName}' has been initialized on '/${apiName}/api/v${apiVer
 // Setup Base Route & Define Routes ---------------------------------------
 
 // Set the base url
-app.set('base', `/${apiName}/api/v${apiVersion}`);
+app.set('base', APIBasePath);
 logger.info(`Base route set`);
 
 // City Routes
-app.use(`/${apiName}/api/v${apiVersion}`, cityRouter);
-logger.info(`City routes defined`);
+app.use(APIBasePath, cityRouter);
+logger.info('City routes defined');
+
+// Customer Routes
+app.use(APIBasePath, customerRouter);
+logger.info('Customer routes defined');
+
+// Product Routes
+app.use(APIBasePath, productRouter);
+logger.info('Product routes defined');
+
+// Route Routes
+app.use(APIBasePath, routeRouter);
+logger.info('Route routes defined');
+
+// Service Routes
+app.use(APIBasePath, serviceRouter);
+logger.info('Service routes defined');
+
+// RouteCustomer Routes
+app.use(APIBasePath, routeCustomerRouter);
+logger.info('RouteCustomer routes defined');
+
+// ServiceProduct Routes
+app.use(APIBasePath, serviceProductRouter);
+logger.info('ServiceProduct routes defined');
+
+// ServiceData Routes
+app.use(APIBasePath, serviceDataRouter);
+logger.info('ServiceData routes defined');
 
 // ------------------------------------------------------------------------
 

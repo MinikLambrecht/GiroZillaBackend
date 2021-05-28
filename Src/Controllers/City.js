@@ -1,258 +1,64 @@
 
-/* eslint-disable consistent-return */
 import logger from '../Config/Winston';
 import pool from '../Config/Database';
+import { SendHTTPCode, SendHTTPCodeMySQL, SendHTTPCodeResultArray, SendHTTPCodeResultObject } from '../Config/HttpCodes';
 import { CityModel } from '../Models';
 
-let City = (zip, name) => new CityModel({
-    zip: zip,
-    name: name,
-});
+let City = (id, ZipCode, City) => new CityModel(
+    id,
+    ZipCode,
+    City
+);
 
-
-function AddCity(req, res) {
+function AddCity(req, res) 
+{
     let nc = City(
-        req.body.zip,
-        req.body.city
+        null,
+        req.body.ZipCode,
+        req.body.City
     );
 
-    if (nc.zip == null || nc.name == null || !nc.name)
-    {
-        res.status(405).json({
-            Code: 405,
-            Message: 'Method Not Allowed, missing data in request.'
-        })
-    }
-
-    const q = `CALL girozilla.Add_City(${nc.zip}, '${nc.name}')`;
+    const q = `CALL girozilla.Add_City(${nc.ZipCode}, '${nc.City}')`;
 
     // Check for errors
     pool.query(q, (err, rows) => 
     {
         if(!err)
         {
-            let msg = `City '${nc.name}' has been added with zipcode ${nc.zip}`;
-
-            logger.debug(msg);
-
-            res.status(201).json({
-                Message: msg
-            });
+            if (nc.City == null || !nc.City || nc.City == undefined)
+            {
+                SendHTTPCode(res, 405);
+                res.end();
+            }
+            else if (nc.ZipCode == null)
+            {
+                SendHTTPCode(res, 405);
+                res.end();
+            }
+            else if (!err && rows.affectedRows > 0)
+            {
+                SendHTTPCode(res, 201, `City '${nc.City}' has been added with zipcode ${nc.ZipCode}`, logger);
+            }
+            else
+            {
+                SendHTTPCodeMySQL(err, logger, res, 400);
+            }
         }
         else
         {
-            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
-
-            logger.error(errorMessage);
-
             switch(err.code)
             {
                 case "ER_BAD_FIELD_ERROR":
-                {
-                    res.status(400).json({
-                        Code: err.code,
-                        Number: err.errno,
-                        SqlState: err.sqlState,
-                        Stack: err.stack
-                    })
-                    break;
-                }
+                    {
+                        SendHTTPCodeMySQL(err, logger, res, 405);
+                        break;
+                    }
+                case "ER_DUP_ENTRY":
+                    {
+                        SendHTTPCodeMySQL(err, logger, res, 403);
+                        break;
+                    }
             }
-        }
-    });
-}
-
-function GetCityByID(req, res)
-{
-    let value = req.query.id;
-
-    const query = `CALL girozilla.Get_City_By_ID(${value})`;
-
-    pool.query(query, (err, rows) =>
-    {
-        if (value == "" || rows[0].length < 1)
-        {
-            res.status(204);
-            res.end();
-            pool.destroy();
-        }
-
-        if (!err && rows[0].length > 0)
-        {
-            res.json(rows[0]);
-        }
-        else
-        {
-            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
-
-            logger.error(errorMessage);
-
-            res.status(400).json({
-                Code: err.code,
-                Number: err.errno,
-                SqlState: err.sqlState,
-                Stack: err.stack
-            });
-        }
-    });
-}
-
-function GetCityByZip(req, res) 
-{
-    let value = req.query.zip;
-
-    const query = `CALL girozilla.Get_City_By_ZipCode('${value}')`;
-
-    pool.query(query, (err, rows) =>
-    {
-        if (value == "" || rows[0].length < 1)
-        {
-            res.status(204);
-            res.end();
-            pool.destroy();
-        }
-
-        if (!err && rows[0].length > 0)
-        {
-            res.json(rows[0][0]);
-        }
-        else
-        {
-            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
-
-            logger.error(errorMessage);
-
-            res.json({
-                Code: err.code,
-                Number: err.errno,
-                SqlState: err.sqlState,
-                Stack: err.stack
-            });
-        }
-    });
-}
-
-function GetCityByName(req, res) 
-{
-    let value = req.query.name;
-
-    const query = `CALL girozilla.Get_City_By_Name("${value}")`;
-
-    pool.query(query, (err, rows) =>
-    {
-        if (value == "" || rows[0].length < 1)
-        {
-            res.status(204);
-            res.end();
-            pool.destroy();
-        }
-
-        if (!err && rows[0].length > 0)
-        {
-            res.json(rows[0][0]);
-        }
-        else
-        {
-            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
-
-            logger.error(errorMessage);
-
-            res.json({
-                Code: err.code,
-                Number: err.errno,
-                SqlState: err.sqlState,
-                Stack: err.stack
-            });
-        }
-    });
-}
-
-function EditCity(req, res)
-{
-    let value = req.body.value;
-
-    let nc = City(
-        req.body.zip,
-        req.body.city
-    );
-
-    const q = `CALL girozilla.Edit_City(${value}, ${nc.zip}, '${nc.name}')`;
-
-    pool.query(q, (err, rows) =>
-    {
-        
-        if (nc.zip == "" || nc.zip == undefined || nc.name == "" || nc.name == undefined || value == "" || value == undefined || rows.affectedRows < 1)
-        {
-            res.status(405).json({
-                Code: 405,
-                Message: 'Method Not Allowed, missing data in request.'
-            });
-            res.end();
-            pool.destroy();
-        }
-
-        if (!err && rows.affectedRows > 0)
-        {
-            let msg = `City with id or ZipCode ${value} has been changed`;
-
-            logger.debug(msg);
-
-            res.status(200).json({
-                Message: msg
-            });
-        }
-        else
-        {
-            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
-
-            logger.error(errorMessage);
-
-            res.json({
-                Code: err.code,
-                Number: err.errno,
-                SqlState: err.sqlState,
-                Stack: err.stack
-            });
-        }
-    });
-}
-
-function RemoveCity (req, res)
-{
-    let value = req.query.value;
-
-    const query = `CALL girozilla.Remove_City('${value}')`;
-
-    pool.query(query, (err, rows) =>
-    {
-        if (rows.affectedRows < 1)
-        {
-            res.status(204);
-        }
-
-        if(!err && rows.affectedRows > 0)
-        {
-            console.log(`Error: ${rows.affectedRows}`)
-            let msg = `OK, City with id or Zipcode ${value} has been removed`;
-
-            logger.debug(msg);
-
-            res.status(200).json({
-                Message: msg
-            });
-        }
-        else
-        {
-            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
-
-            logger.error(errorMessage);
-
-            res.status(400).json({
-                Code: err.code,
-                Number: err.errno,
-                SqlState: err.sqlState,
-                Stack: err.stack
-            });
         }
     });
 }
@@ -265,20 +71,166 @@ function GetAllCities (req, res)
     {
         if (!err && rows[0].length > 0)
         {
-            res.json(rows[0]);
+            SendHTTPCodeResultArray(rows, res, 200);
         }
         else
         {
-            let errorMessage = `${err.code} ${err.errno} (${err.sqlState}): ${err.stack}`;
+            SendHTTPCodeMySQL(err, logger, res, 400);
+        }
+    });
+}
 
-            logger.error(errorMessage);
+function GetCityByID(req, res)
+{
+    let id = req.query.id;
 
-            res.json({
-                Code: err.code,
-                Number: err.errno,
-                SqlState: err.sqlState,
-                Stack: err.stack
-            });
+    const query = `CALL girozilla.Get_City_By_ID(${id})`;
+
+    pool.query(query, (err, rows) =>
+    {
+        if(isNaN(id))
+        {
+            SendHTTPCode(res, 405);
+            res.end();
+        }
+        else if (id == "" || rows[0].length < 1)
+        {
+            SendHTTPCode(res, 204);
+            res.end();
+        }
+        else if (!err && rows[0].length > 0)
+        {
+            SendHTTPCodeResultObject(rows, res, 200);
+        }
+        else
+        {
+            SendHTTPCodeMySQL(err, logger, res, 400);
+        }
+    });
+}
+
+function GetCityByZip(req, res)
+{
+    let ZipCode = req.query.ZipCode;
+
+    const query = `CALL girozilla.Get_City_By_ZipCode('${ZipCode}')`;
+
+    pool.query(query, (err, rows) =>
+    {
+        if(isNaN(ZipCode))
+        {
+            SendHTTPCode(res, 405);
+            res.end();
+        }
+        else if (ZipCode == "" || rows[0].length < 1)
+        {
+            SendHTTPCode(res, 204);
+            res.end();
+        }
+        else if (!err && rows[0].length > 0)
+        {
+            SendHTTPCodeResultArray(rows, res, 200);
+        }
+        else
+        {
+            SendHTTPCodeMySQL(err, logger, res, 400);
+        }
+    });
+}
+
+function GetCityByName(req, res)
+{
+    let City = req.query.City;
+
+    const query = `CALL girozilla.Get_City_By_Name("${City}")`;
+
+    pool.query(query, (err, rows) =>
+    {
+        if (City == "" || rows[0].length < 1)
+        {
+            SendHTTPCode(res, 204);
+            res.end();
+        }
+        else if (!err && rows[0].length > 0)
+        {
+            SendHTTPCodeResultArray(rows, res, 200);
+        }
+        else
+        {
+            SendHTTPCodeMySQL(err, logger, res, 400);
+        }
+    });
+}
+
+function EditCity(req, res)
+{
+    let nc = City(
+        req.body.id,
+        req.body.ZipCode,
+        req.body.City
+    );
+
+    const q = `CALL girozilla.Edit_City(${nc.id}, ${nc.ZipCode}, '${nc.City}')`;
+
+    pool.query(q, (err, rows) =>
+    {
+        if(isNaN(nc.id))
+        {
+            SendHTTPCode(res, 405);
+            res.end();
+        }
+        else if (nc.id == "")
+        {
+            SendHTTPCode(res, 405);
+            res.end();
+        }
+        else if (nc.City == null || !nc.city || nc.City == undefined )
+        {
+            SendHTTPCode(res, 204);
+            res.end();
+        }
+        else if (nc.ZipCode == null || nc.id == null)
+        {
+            SendHTTPCode(res, 204);
+            res.end();
+        }
+        else if (rows.affectedRows < 1)
+        {
+            SendHTTPCode(res, 204);
+            res.end();   
+        }
+        else if (!err && rows.affectedRows > 0)
+        {
+            SendHTTPCode(res, 200, `City with id or ZipCode ${nc.id} has been changed`, logger);
+        }
+        else
+        {
+            SendHTTPCodeMySQL(err, logger, res, 400);
+        }
+    });
+}
+
+function RemoveCity (req, res)
+{
+    let id = req.query.id;
+
+    const query = `CALL girozilla.Remove_City('${id}')`;
+
+    pool.query(query, (err, rows) =>
+    {
+        if (rows.affectedRows < 1)
+        {
+            SendHTTPCode(res, 204);
+        }
+        else if(!err && rows.affectedRows > 0)
+        {
+            let msg = `OK, City with id or Zipcode ${id} has been removed`;
+
+            SendHTTPCode(res, 200, msg, logger);
+        }
+        else
+        {
+            SendHTTPCodeMySQL(err, logger, res, 400);
         }
     });
 }

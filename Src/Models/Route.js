@@ -1,9 +1,9 @@
 export class RouteModel {
-    constructor(data) {
-        this.id          = data.id;
-        this.area        = data.area;
-        this.description = data.description;
-        this.month       = data.month;
-        this.year        = data.year;
+    constructor(id, Name, Description, Month, Year) {
+        this.id          = id,
+        this.Name        = Name,
+        this.Description = Description,
+        this.Month       = Month,
+        this.Year        = Year
     }
 };

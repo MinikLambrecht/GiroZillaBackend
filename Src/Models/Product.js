@@ -1,8 +1,8 @@
 export class ProductModel {
-    constructor(data) {
-        this.id          = data.id;
-        this.name        = data.name;
-        this.price       = data.price;
-        this.description = data.description;
+    constructor(id, Name, Price, Description) {
+        this.id          = id,
+        this.Name        = Name,
+        this.Price       = Price,
+        this.Description = Description
     }
 };

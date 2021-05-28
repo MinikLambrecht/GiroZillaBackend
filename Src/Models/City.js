@@ -1,6 +1,7 @@
 export class CityModel {
-    constructor(data) {
-        this.zip  = data.zip;
-        this.name = data.name;
+    constructor(id, ZipCode, City) {
+        this.id       = id,
+        this.ZipCode  = ZipCode,
+        this.City     = City
     }
 };

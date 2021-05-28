@@ -1,7 +1,8 @@
 export class RouteCustomerModel {
-    constructor(data) {
-        this.id         = data.id;
-        this.routeid    = data.routeid;
-        this.customerid = data.customerid;
+    constructor(id, RouteID, CustomerID, CityID) {
+        this.id         = id,
+        this.RouteID    = RouteID
+        this.CustomerID = CustomerID;
+        this.CityID     = CityID;
     }
 };

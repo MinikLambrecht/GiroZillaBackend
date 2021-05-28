@@ -1,6 +1,5 @@
 export { CityModel }            from './City';
 export { CustomerModel }        from './Customer';
-export { MonthModel }           from './Month';
 export { ProductModel }         from './Product';
 export { RouteModel }           from './Route';
 export { RouteCustomerModel }   from './RouteCustomer';

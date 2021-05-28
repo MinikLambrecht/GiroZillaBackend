@@ -1,16 +1,16 @@
 export class CustomerModel {
-    constructor(data) {
-        this.id              = data.id;
-        this.firstname       = data.firstname;
-        this.lastname        = data.lastname;
-        this.address         = data.address;
-        this.zipcode         = data.zipcode;
-        this.city            = data.city;
-        this.services_needed = data.services_needed;
-        this.comment         = data.comment;
-        this.mobile          = data.mobile;
-        this.home            = data.home;
-        this.email           = data.email;
-        this.month           = data.month;
+    constructor(id, FirstName, LastName, Address, ZipCode, CityID, ServicesNeeded, Comment, MobilePhoneNumber, HomePhoneNumber, Email, Month) {
+        this.id                 = id,
+        this.Firstname          = FirstName,
+        this.LastName           = LastName,
+        this.Address            = Address,
+        this.ZipCode            = ZipCode,
+        this.CityID             = CityID,
+        this.ServicesNeeded     = ServicesNeeded,
+        this.Comment            = Comment,
+        this.MobilePhoneNumber  = MobilePhoneNumber,
+        this.HomePhoneNumber    = HomePhoneNumber,
+        this.Email              = Email,
+        this.Month              = Month
     }
 };
