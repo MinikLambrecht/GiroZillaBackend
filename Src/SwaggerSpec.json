@@ -193,7 +193,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": 405,
                                     "Message": "Method Not Allowed."
@@ -292,7 +291,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": 405,
                                     "Message": "Method Not Allowed."
@@ -819,7 +817,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": 405,
                                     "Message": "Method Not Allowed."
@@ -1716,7 +1713,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": 405,
                                     "Message": "Method Not Allowed."
@@ -2059,7 +2055,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": 405,
                                     "Message": "Method Not Allowed."
@@ -2168,7 +2163,6 @@
                         "description": "Forbidden.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": "405,",
                                     "Message": "Forbidden"
@@ -2498,7 +2492,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": 405,
                                     "Message": "Method Not Allowed."
@@ -2617,7 +2610,6 @@
                         "description": "Forbidden.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": "405,",
                                     "Message": "Forbidden"
@@ -3015,7 +3007,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": 405,
                                     "Message": "Method Not Allowed."
