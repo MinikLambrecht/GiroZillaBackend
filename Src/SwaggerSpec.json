@@ -4405,7 +4405,6 @@
                         "description": "Method Not Allowed.",
                         "content": {
                             "application/json": {
-                                "type": "object",
                                 "example": {
                                     "Code": "405,",
                                     "Message": "Method Not Allowed."
