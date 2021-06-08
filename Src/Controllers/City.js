@@ -1,4 +1,3 @@
-
 import logger from '../Config/Winston';
 import pool from '../Config/Database';
 import { SendHTTPCode, SendHTTPCodeMySQL, SendHTTPCodeResultArray, SendHTTPCodeResultObject } from '../Config/HttpCodes';

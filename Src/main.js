@@ -8,10 +8,11 @@ let SoftwareInformation = require('../package.json');
 let apiName = SoftwareInformation.name;
 let apiVersion = SoftwareInformation.version.split('.')[0];
 
-let APIBasePath = `/${apiName}/api/v${apiVersion}`;
+let APIBasePath = `/${apiName}/v${apiVersion}`;
 
 // Application level imports
 import express from 'express';
+const path = require('path');
 
 // Security related dependencies
 import passport from 'passport';
@@ -21,12 +22,24 @@ import cors from 'cors';
 // Loggers / Documentation
 import morgan from 'morgan';
 import logger from './Config/Winston';
+
 import swaggerUI from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+const swaggerUiAssetPath = require("swagger-ui-dist").getAbsoluteFSPath() + '/Docs';
+const swaggerDoc = require('./SwaggerSpec.json');
 
 // Routes
 // import router from './Routes';
-import { cityRouter, customerRouter, productRouter, routeCustomerRouter, routeRouter, serviceDataRouter, serviceProductRouter, serviceRouter } from "./Routes";
+import { cityRouter, 
+         customerRouter, 
+         productRouter,
+         routeCustomerRouter, 
+         routeRouter, 
+         serviceDataRouter, 
+         serviceProductRouter, 
+         serviceRouter } from "./Routes";
+
+logger.info(`Loading ${EnvMode} environment`);
 
 // ------------------------------------------------------------------------
 
@@ -34,8 +47,7 @@ logger.info('Imports Done');
 
 // CONFIGURATION ----------------------------------------------------------
 
-
-// Setup Swagger OpenAPI 3.0 docs
+// Generate Swagger OpenAPI 3.0 docs
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -54,63 +66,67 @@ const options = {
         },
         servers: [
             {
-                url: 'http://localhost:21875/girozillabackend/api/v1',
+                url: `http://localhost:21875${APIBasePath}`,
                 description: 'Development Server',
-            },
-            {
-                url: 'https://api.pyrocorestudios.dk/girozillabackend/api/v1',
-                description: 'Production Server',
             }
         ],
     },
     apis: [`${__dirname}/Routes/*.js`],
 };
 
+if (EnvMode == 'development')
+{
+    options.definition.servers[0].url = `https://api.pyrocorestudios.dk${APIBasePath}`;
+    options.definition.servers[0].description = "Production Server";
+}
+
 const swaggerSpecification = swaggerJsdoc(options);
 
-const fs = require('fs');
+if (EnvMode == 'development')
+{
+    const fs = require('fs');
 
-const GenSpec = JSON.stringify(swaggerSpecification, null, 4);
-const Spec = `${__dirname}/SwaggerSpec.json`;
+    const GenSpec = JSON.stringify(swaggerSpecification, null, 4);
+    const Spec = `${__dirname}/SwaggerSpec.json`;
 
-fs.readFile(Spec, 'utf8', (err, data) => {
-    if (err) 
-    {
-        logger.error('Specification not found, writing new!');
-
-        fs.writeFile(Spec, GenSpec, (err) => {
-            if(err)
-            {
-                logger.error(`Error writing specification! \n ${err}`);
-            }
-            else
-            {
-                logger.info('New specification created!');
-            }
-        });
-    } 
-    else 
-    {
-        if (JSON.stringify(data) == JSON.stringify(GenSpec))
+    fs.readFile(Spec, 'utf8', (err, data) => {
+        if (err) 
         {
-            logger.info('Specification is up to date!');
-        }
-        else
-        {
+            logger.error('Specification not found, writing new!');
+
             fs.writeFile(Spec, GenSpec, (err) => {
-                if (err) 
+                if(err)
                 {
-                    logger.error(`Could not update specification! \n ${err}`);
+                    logger.error(`Error writing specification! \n ${err}`);
                 }
                 else
                 {
-                    logger.info('Specification was updated!');
+                    logger.info('New specification created!');
                 }
             });
+        } 
+        else 
+        {
+            if (JSON.stringify(data) == JSON.stringify(GenSpec))
+            {
+                logger.info('Specification is up to date!');
+            }
+            else
+            {
+                fs.writeFile(Spec, GenSpec, (err) => {
+                    if (err) 
+                    {
+                        logger.error(`Could not update specification! \n ${err}`);
+                    }
+                    else
+                    {
+                        logger.info('Specification was updated!');
+                    }
+                });
+            }
         }
-    }
-});
-
+    });
+}
 
 let corsOptions = {}
 
@@ -155,8 +171,28 @@ const app = express();
 // Enable CORS for all requests
 app.use(cors(corsOptions));
 
-// Setup Swagger Documentation Page
-app.use(`/${apiName}/api/v${apiVersion}/docs`, swaggerUI.serve, swaggerUI.setup(swaggerSpecification));
+// Setup Swagger Documentation Page 
+if (EnvMode == 'production')
+{
+    app.use(`${APIBasePath}/ApiDocs`, express.static(swaggerUiAssetPath));
+}
+else
+{
+    app.use(`${APIBasePath}/ApiDocs`, swaggerUI.serve, swaggerUI.setup(swaggerSpecification));
+}
+/*  */
+app.get('/', (req, res) => {
+    res.redirect(301, `${APIBasePath}/ApiDocs`);
+});
+
+app.get(`${APIBasePath}`, (req, res) => {
+    res.redirect(301, `${APIBasePath}/ApiDocs`);
+});
+
+app.get('/ApiDocs', (req, res) => {
+    res.redirect(301, `${APIBasePath}/ApiDocs`);
+});
+
 logger.info('Swagger-UI docs setup');
 
 /* Add Helmet to secure the API with 11 connect style middlewares, 10 because we use Express and don't need to remove the "X-Powered-By" header.
@@ -192,7 +228,7 @@ app.use(morgan('[:remote-addr - :remote-user] :method :url (HTTP/:http-version :
 
 // ------------------------------------------------------------------------
 
-logger.info(`API '${apiName}' has been initialized on '/${apiName}/api/v${apiVersion}'`);
+logger.info(`API '${apiName}' has been initialized on '${APIBasePath}'`);
 
 // Setup Base Route & Define Routes ---------------------------------------
 

@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 // Load modules
 import util from 'util';
 import mysql from 'mysql2';

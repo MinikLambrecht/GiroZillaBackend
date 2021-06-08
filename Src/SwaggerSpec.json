@@ -15,10 +15,6 @@
     },
     "servers": [
         {
-            "url": "http://localhost:21875/girozillabackend/api/v1",
-            "description": "Development Server"
-        },
-        {
             "url": "https://api.pyrocorestudios.dk/girozillabackend/api/v1",
             "description": "Production Server"
         }

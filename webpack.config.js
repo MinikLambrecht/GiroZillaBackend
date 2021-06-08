@@ -1,3 +1,5 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const path = require('path');
 
 const BUILD_DIR = path.join(__dirname, '/Build');
@@ -30,17 +32,8 @@ module.exports = {
                 use: 'babel-loader',
             },
             {
-                test: /\.json$/,
-                include: SRC_DIR,
-                use: 'json-loader',
-            },
-            {
                 test: /\.yaml$/,
                 use: [
-                    { 
-                        loader: 
-                        'json-loader' 
-                    },
                     { 
                         loader: 
                         'yaml-loader' 
@@ -49,4 +42,28 @@ module.exports = {
             },
         ],
     },
+    plugins: [
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'node_modules/swagger-ui-dist/'),
+                    globOptions: {
+                        test: /\.(js|css|html|png)$/i,
+                        ignore: [
+                            path.resolve(__dirname, 'node_modules/swagger-ui-dist/index.js'),
+                            path.resolve(__dirname, 'node_modules/swagger-ui-dist/absolute-path.js'),
+                            path.resolve(__dirname, 'node_modules/swagger-ui-dist/*.map'),
+                            path.resolve(__dirname, 'node_modules/swagger-ui-dist/*.md'),
+                            path.resolve(__dirname, 'node_modules/swagger-ui-dist/*.json')
+                        ], 
+                    },
+                    to: 'Docs'
+                },
+                {
+                    from: path.resolve(__dirname, 'Src/SwaggerSpec.json'),
+                    to: 'Docs'
+                }
+            ],
+        }),
+    ],
 };
